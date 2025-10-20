@@ -1,12 +1,10 @@
-using System;
+namespace FiltroClientiOrdiniViaggi.Models;
 
-namespace ElencoAnalyzer.Models
+public sealed class ResultRow
 {
-    public sealed class Record
-    {
-        public string Ordine { get; init; } = "";
-        public string Cliente { get; init; } = "";
-        public string Viaggio { get; init; } = "";
-        public DateTime Data { get; init; } // solo data (00:00)
-    }
+    public DateTime Data { get; init; }
+    public string Viaggio { get; init; } = string.Empty;
+    public int TotaleOrdini { get; init; }
+    public int ClientiDistinti { get; init; }
+    public string AltriClienti { get; init; } = string.Empty;
 }

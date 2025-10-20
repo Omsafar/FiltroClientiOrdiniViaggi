@@ -1,28 +1,25 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
-using ElencoAnalyzer.ViewModels;
+using FiltroClientiOrdiniViaggi.ViewModels;
 
-namespace ElencoAnalyzer.Views
+namespace FiltroClientiOrdiniViaggi;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-            DataContext = new MainViewModel();
-        }
+        InitializeComponent();
+        DataContext = new MainViewModel();
+    }
 
-        private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is ListBox lb && lb.SelectedItem is string selected)
         {
-            if (DataContext is MainViewModel vm)
+            vm.QueryText = selected;
+            if (vm.AnalyzeCommand.CanExecute(null))
             {
-                // Doppio click su un suggerimento => imposta QueryText e lancia Analizza
-                if (sender is ListBox lb && lb.SelectedItem is string s)
-                {
-                    vm.QueryText = s;
-                    if (vm.AnalyzeCommand.CanExecute(null))
-                        vm.AnalyzeCommand.Execute(null);
-                }
+                vm.AnalyzeCommand.Execute(null);
             }
         }
     }

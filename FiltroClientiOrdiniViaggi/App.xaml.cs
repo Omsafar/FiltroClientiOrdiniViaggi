@@ -1,6 +1,7 @@
-﻿using System.Windows;
+using System.Windows;
 
-namespace ElencoAnalyzer
+namespace FiltroClientiOrdiniViaggi;
+
+public partial class App : Application
 {
-    public partial class App : Application { }
 }
