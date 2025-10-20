@@ -13,18 +13,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+        <TextBlock Grid.Row="0"
                    Text="Analisi ordini per cliente (CSV: C:\temp\elenco.csv)"
                    FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
 
         <!-- Barra di controllo -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center" Text="Cliente:"/>
             <TextBox Width="320"
                      Margin="8,0,0,0"
@@ -32,42 +28,58 @@
             <Button Content="Elabora"
                     Margin="8,0,0,0"
                     Command="{Binding AnalyzeCommand}" />
-            <Button Content="Esporta CSV"
+            <Button Content="Esporta Excel"
                     Margin="8,0,0,0"
                     Command="{Binding ExportCommand}" />
             <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"
                        Text="{Binding StatusMessage}" />
         </StackPanel>
 
-        <!-- Suggerimenti -->
-        <Border Grid.Row="2" Grid.Column="0" Margin="0,8,8,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <!-- Contenuti principali -->
+        <TabControl Grid.Row="2"
+                    Margin="0,12,0,12"
+                    SelectedIndex="{Binding SelectedTabIndex}">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Padding" Value="16,8"/>
+                    <Setter Property="Margin" Value="0,0,6,0"/>
+                </Style>
+            </TabControl.Resources>
 
-                <TextBlock Text="Suggerimenti cliente" FontWeight="SemiBold" Margin="8,8,8,4"/>
-                <ListBox Grid.Row="1"
-                         ItemsSource="{Binding FilteredClients}"
-                         SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
-                         MouseDoubleClick="ListBox_MouseDoubleClick" />
-            </Grid>
-        </Border>
+            <TabItem Header="Suggerimenti">
+                <Border Margin="0,0,0,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-        <!-- Risultati -->
-        <DataGrid Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" ItemsSource="{Binding Results}"
-                  CanUserAddRows="False" IsReadOnly="True" Margin="0,8,0,8">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=\{0:yyyy-MM-dd\}}" Width="120"/>
-                <DataGridTextColumn Header="Viaggio" Binding="{Binding Viaggio}" Width="*"/>
-                <DataGridTextColumn Header="Totale ordini" Binding="{Binding TotaleOrdini}" Width="140"/>
-                <DataGridTextColumn Header="Clienti distinti" Binding="{Binding ClientiDistinti}" Width="140"/>
-                <DataGridTextColumn Header="Altri clienti" Binding="{Binding AltriClienti}" Width="300"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                        <TextBlock Text="Suggerimenti cliente" FontWeight="SemiBold" Margin="8,8,8,4"/>
+                        <ListBox Grid.Row="1"
+                                 ItemsSource="{Binding FilteredClients}"
+                                 SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
+                                 MouseDoubleClick="ListBox_MouseDoubleClick" />
+                    </Grid>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="Risultati">
+                <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Results}"
+                          CanUserAddRows="False" IsReadOnly="True"
+                          Margin="0,0,0,8"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=\{0:yyyy-MM-dd\}}" Width="120"/>
+                        <DataGridTextColumn Header="Viaggio" Binding="{Binding Viaggio}" Width="*"/>
+                        <DataGridTextColumn Header="Totale ordini" Binding="{Binding TotaleOrdini}" Width="140"/>
+                        <DataGridTextColumn Header="Clienti distinti" Binding="{Binding ClientiDistinti}" Width="140"/>
+                        <DataGridTextColumn Header="Altri clienti" Binding="{Binding AltriClienti}" Width="300"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
 
         <!-- Footer -->
-        <ProgressBar Grid.Row="3" Grid.ColumnSpan="2" Height="10" Minimum="0" Maximum="100" Value="{Binding Progress}"/>
+        <ProgressBar Grid.Row="3" Height="10" Minimum="0" Maximum="100" Value="{Binding Progress}"/>
     </Grid>
 </Window>

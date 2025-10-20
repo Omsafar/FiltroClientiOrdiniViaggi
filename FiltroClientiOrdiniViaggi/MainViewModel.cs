@@ -2,9 +2,14 @@ using FiltroClientiOrdiniViaggi.Models;
 using FiltroClientiOrdiniViaggi.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace FiltroClientiOrdiniViaggi.ViewModels;
 
@@ -56,6 +61,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
         set => Set(ref _statusMessage, value);
     }
 
+    private int _selectedTabIndex;
+    public int SelectedTabIndex
+    {
+        get => _selectedTabIndex;
+        set => Set(ref _selectedTabIndex, value);
+    }
+
     public ICommand AnalyzeCommand { get; }
     public ICommand ExportCommand { get; }
 
@@ -63,6 +75,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         StatusMessage = "Carico e aggrego CSV...";
         try
         {
@@ -132,6 +145,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         Progress = 100;
         StatusMessage = $"Righe risultato: {Results.Count:n0}";
+        SelectedTabIndex = 1;
+        CommandManager.InvalidateRequerySuggested();
     }
 
     private void ExportResults()
@@ -140,17 +155,43 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             Directory.CreateDirectory(@"C:\Temp");
             var safeClient = MakeSafeFilename(QueryText ?? "cliente");
-            var path = $@"C:\Temp\output_{safeClient}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            var path = $@"C:\Temp\output_{safeClient}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
-            using var sw = new StreamWriter(path, false, System.Text.Encoding.UTF8);
-            sw.WriteLine("Data;Viaggio;Totale ordini;Clienti distinti;Altri clienti");
-            foreach (var r in Results)
+            using (var package = new ExcelPackage())
             {
-                sw.WriteLine($"{r.Data:yyyy-MM-dd};\"{r.Viaggio}\";{r.TotaleOrdini};{r.ClientiDistinti};\"{r.AltriClienti}\"");
+                var worksheet = package.Workbook.Worksheets.Add("Risultati");
+                worksheet.Cells[1, 1].Value = "Data";
+                worksheet.Cells[1, 2].Value = "Viaggio";
+                worksheet.Cells[1, 3].Value = "Totale ordini";
+                worksheet.Cells[1, 4].Value = "Clienti distinti";
+                worksheet.Cells[1, 5].Value = "Altri clienti";
+
+                int row = 2;
+                foreach (var r in Results)
+                {
+                    worksheet.Cells[row, 1].Value = r.Data;
+                    worksheet.Cells[row, 1].Style.Numberformat.Format = "yyyy-mm-dd";
+                    worksheet.Cells[row, 2].Value = r.Viaggio;
+                    worksheet.Cells[row, 3].Value = r.TotaleOrdini;
+                    worksheet.Cells[row, 4].Value = r.ClientiDistinti;
+                    worksheet.Cells[row, 5].Value = r.AltriClienti;
+                    row++;
+                }
+
+                using (var headerRange = worksheet.Cells[1, 1, 1, 5])
+                {
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    headerRange.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0xF1, 0xF3, 0xF4));
+                    headerRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                }
+
+                worksheet.Cells.AutoFitColumns();
+                package.SaveAs(new FileInfo(path));
             }
 
             StatusMessage = $"Esportato: {path}";
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
                 Arguments = $"/select,\"{path}\"",
