@@ -1,0 +1,57 @@
+﻿<Window x:Class="ElencoAnalyzer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ElencoAnalyzer.Views"
+        mc:Ignorable="d"
+        Title="Elenco Analyzer" Height="720" Width="1100"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="16" RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*,Auto">
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Analisi ordini per cliente (CSV: C:\temp\elenco.csv)"
+                   FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
+
+        <!-- Barra di controllo -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="8">
+            <TextBlock VerticalAlignment="Center" Text="Cliente:"/>
+            <TextBox Width="320" Text="{Binding QueryText, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Content="Elabora" Command="{Binding AnalyzeCommand}" />
+            <Button Content="Esporta CSV" Command="{Binding ExportCommand}" Margin="8,0,0,0"/>
+            <TextBlock VerticalAlignment="Center" Margin="12,0,0,0"
+                       Text="{Binding StatusMessage}" />
+        </StackPanel>
+
+        <!-- Suggerimenti -->
+        <Border Grid.Row="2" Grid.Column="0" Margin="0,8,8,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Suggerimenti cliente" FontWeight="SemiBold" Margin="8,8,8,4"/>
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding FilteredClients}"
+                         SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
+                         MouseDoubleClick="ListBox_MouseDoubleClick"
+                         />
+            </Grid>
+        </Border>
+
+        <!-- Risultati -->
+        <DataGrid Grid.Row="2" Grid.Column="1" AutoGenerateColumns="False" ItemsSource="{Binding Results}"
+                  CanUserAddRows="False" IsReadOnly="True" Margin="0,8,0,8">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=\{0:yyyy-MM-dd\}}" Width="120"/>
+                <DataGridTextColumn Header="Viaggio" Binding="{Binding Viaggio}" Width="*"/>
+                <DataGridTextColumn Header="Totale ordini" Binding="{Binding TotaleOrdini}" Width="140"/>
+                <DataGridTextColumn Header="Clienti distinti" Binding="{Binding ClientiDistinti}" Width="140"/>
+                <DataGridTextColumn Header="Altri clienti" Binding="{Binding AltriClienti}" Width="300"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Footer -->
+        <ProgressBar Grid.Row="3" Grid.ColumnSpan="2" Height="10" Minimum="0" Maximum="100" Value="{Binding Progress}"/>
+    </Grid>
+</Window>
